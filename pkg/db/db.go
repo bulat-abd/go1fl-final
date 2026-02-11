@@ -5,12 +5,12 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/bulat-abd/go1fl-final/internal/config"
 	_ "modernc.org/sqlite"
 )
 
-var FilePath = "scheduler.db"
-
-func Init(dbFile string) (*sql.DB, error) {
+func Init() (*sql.DB, error) {
+	dbFile := config.GetDBFilePath()
 	_, err := os.Stat(dbFile)
 	var install bool
 	if err != nil {

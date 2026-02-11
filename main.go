@@ -6,6 +6,6 @@ import (
 )
 
 func main() {
-	_, _ = db.Init(db.FilePath)
+	_, _ = db.Init()
 	server.Run()
 }

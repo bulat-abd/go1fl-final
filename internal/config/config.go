@@ -8,6 +8,8 @@ import (
 var defaultPort = 7540
 var WebDir = "./web"
 
+var defaultDBFilePath = "scheduler.db"
+
 func GetPort() int {
 	port := defaultPort
 	envPort := os.Getenv("TODO_PORT")
@@ -17,4 +19,13 @@ func GetPort() int {
 		}
 	}
 	return port
+}
+
+func GetDBFilePath() string {
+	path := defaultDBFilePath
+	envPath := os.Getenv("TODO_DBFILE")
+	if len(envPath) > 0 {
+		path = envPath
+	}
+	return path
 }
