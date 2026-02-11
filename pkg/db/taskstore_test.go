@@ -81,3 +81,35 @@ func TestSetDate(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, storedTask.Date, "13372048")
 }
+
+func TestUpdate(t *testing.T) {
+	db, err := sql.Open("sqlite", "file:test.db?mode=memory&cache=shared")
+	require.NoError(t, err)
+	defer db.Close()
+	createTableSQL := `
+	CREATE TABLE IF NOT EXISTS "scheduler"
+	(
+	    id INTEGER PRIMARY KEY AUTOINCREMENT,
+		date CHAR(8) NOT NULL DEFAULT "",
+    	title varchar(128) NOT NULL,
+        comment text NOT NULL,
+        repeat varchar(128) NOT NULL
+	);`
+	_, err = db.Exec(createTableSQL)
+	require.NoError(t, err)
+	store := NewTaskStore(db)
+	task := getTestTask()
+
+	id, err := store.Add(task)
+	require.NoError(t, err)
+	require.NotEmpty(t, id)
+
+	err = store.Update(id, "13372048", "title", "comment", "d 1")
+	storedTask, err := store.Get(id)
+	require.NoError(t, err)
+	assert.Equal(t, storedTask.Date, "13372048")
+	assert.Equal(t, storedTask.Title, "title")
+	assert.Equal(t, storedTask.Comment, "comment")
+	assert.Equal(t, storedTask.Repeat, "d 1")
+
+}
