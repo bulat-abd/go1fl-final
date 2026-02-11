@@ -16,12 +16,14 @@ func Init(dbFile string) (*sql.DB, error) {
 	if err != nil {
 		install = true
 	}
+
 	db, err := sql.Open("sqlite", dbFile)
-	defer db.Close()
 	if err != nil {
 		fmt.Println(err)
 		return nil, err
 	}
+	defer db.Close()
+
 	createTableSQL := `
 	CREATE TABLE IF NOT EXISTS "scheduler"
 	(
