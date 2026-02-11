@@ -50,3 +50,14 @@ func (ts TaskStore) SetDate(id int64, date string) error {
 		sql.Named("id", id))
 	return err
 }
+
+func (ts TaskStore) Update(id int64, date, title, comment, repeat string) error {
+	_, err := ts.db.Exec(
+		"UPDATE scheduler SET date = :date, title = :title, comment = :comment, repeat = :repeat WHERE id = :id",
+		sql.Named("date", date),
+		sql.Named("title", title),
+		sql.Named("comment", comment),
+		sql.Named("repeat", repeat),
+		sql.Named("id", id))
+	return err
+}
