@@ -42,3 +42,11 @@ func (ts TaskStore) Delete(id int64) error {
 	)
 	return err
 }
+
+func (ts TaskStore) SetDate(id int64, date string) error {
+	_, err := ts.db.Exec(
+		"UPDATE scheduler SET date = :date WHERE id = :id",
+		sql.Named("date", date),
+		sql.Named("id", id))
+	return err
+}
