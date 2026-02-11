@@ -17,3 +17,13 @@ func TestConfigWithEnv(t *testing.T) {
 	t.Setenv("TODO_PORT", envValue)
 	assert.Equal(t, portValue, GetPort(), `получен неправильный номер порта`)
 }
+
+func TestDBFilePathWithoutEnv(t *testing.T) {
+	assert.Equal(t, defaultDBFilePath, GetDBFilePath(), `получен неправильный путь до файла БД`)
+}
+
+func TestDBFilePathWithEnv(t *testing.T) {
+	envValue := "/some/path"
+	t.Setenv("TODO_DBFILE", envValue)
+	assert.Equal(t, envValue, GetDBFilePath(), `получен неправильный путь до файла БД`)
+}
