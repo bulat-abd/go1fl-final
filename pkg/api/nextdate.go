@@ -109,6 +109,51 @@ func NextDate(now time.Time, dstart string, repeat string) (string, error) {
 			}
 			return date.Format("20060102"), nil
 		}
+
+		if len(mstr) == 3 {
+			weekdaysstr := strings.Split(mstr[1], ",")
+			if len(weekdaysstr) == 0 {
+				return "", errors.New("Bad repeat parameter value")
+			}
+			weekdays := make([]int, 0, len(weekdaysstr))
+			for _, weekdaystr := range weekdaysstr {
+				weekday, err := strconv.Atoi(weekdaystr)
+				if err != nil {
+					return "", errors.New("Bad repeat parameter value")
+				}
+				if weekday < -2 || weekday > 31 {
+					return "", errors.New("Bad repeat parameter value")
+				}
+				weekdays = append(weekdays, weekday)
+			}
+			monthsstr := strings.Split(mstr[2], ",")
+			if len(monthsstr) == 0 {
+				return "", errors.New("Bad repeat parameter value")
+			}
+			months := make([]int, 0, len(monthsstr))
+			for _, monthstr := range monthsstr {
+				month, err := strconv.Atoi(monthstr)
+				if err != nil {
+					return "", errors.New("Bad repeat parameter value")
+				}
+				if month < 1 || month > 12 {
+					return "", errors.New("Bad repeat parameter value")
+				}
+				months = append(months, month)
+			}
+			for {
+				date = date.AddDate(0, 0, 1)
+				dayInt := int(date.Day())
+				monthInt := int(date.Month())
+				t := time.Date(date.Year(), date.Month(), 32, 0, 0, 0, 0, time.UTC)
+				daysInMonth := 32 - t.Day()
+				if afterNow(date, now) && slices.Contains(months, monthInt) && (slices.Contains(weekdays, dayInt) || slices.Contains(weekdays, dayInt-daysInMonth-1)) {
+					break
+				}
+			}
+			return date.Format("20060102"), nil
+		}
+
 	}
 	return "", errors.New("Bad repeat parameter value")
 }
