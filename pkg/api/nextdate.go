@@ -77,6 +77,38 @@ func NextDate(now time.Time, dstart string, repeat string) (string, error) {
 			}
 		}
 		return date.Format("20060102"), nil
+	} else if string(repeat[0]) == "m" {
+		mstr := strings.Split(repeat, " ")
+		if len(mstr) < 2 && len(mstr) > 3 {
+			return "", errors.New("Bad repeat parameter value")
+		}
+		if len(mstr) == 2 {
+			weekdaysstr := strings.Split(mstr[1], ",")
+			if len(weekdaysstr) == 0 {
+				return "", errors.New("Bad repeat parameter value")
+			}
+			weekdays := make([]int, 0, len(weekdaysstr))
+			for _, weekdaystr := range weekdaysstr {
+				weekday, err := strconv.Atoi(weekdaystr)
+				if err != nil {
+					return "", errors.New("Bad repeat parameter value")
+				}
+				if weekday < -2 || weekday > 31 {
+					return "", errors.New("Bad repeat parameter value")
+				}
+				weekdays = append(weekdays, weekday)
+			}
+			for {
+				date = date.AddDate(0, 0, 1)
+				dayInt := int(date.Day())
+				t := time.Date(date.Year(), date.Month(), 32, 0, 0, 0, 0, time.UTC)
+				daysInMonth := 32 - t.Day()
+				if afterNow(date, now) && (slices.Contains(weekdays, dayInt) || slices.Contains(weekdays, dayInt-daysInMonth-1)) {
+					break
+				}
+			}
+			return date.Format("20060102"), nil
+		}
 	}
 	return "", errors.New("Bad repeat parameter value")
 }
