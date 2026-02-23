@@ -17,6 +17,8 @@ func taskHandler(db *sql.DB) func(w http.ResponseWriter, r *http.Request) {
 		// обработка других методов будет добавлена на следующих шагах
 		case http.MethodPost:
 			addTaskHandler(db)(w, r)
+		case http.MethodGet:
+			getTaskHandler(db)(w, r)
 		}
 	}
 }
