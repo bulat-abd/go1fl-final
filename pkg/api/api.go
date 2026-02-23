@@ -8,6 +8,7 @@ import (
 func Init(db *sql.DB) {
 	http.HandleFunc("/api/nextdate", nextDateHandler)
 	http.HandleFunc("/api/task", taskHandler(db))
+	http.HandleFunc("/api/task/done", finishTaskHandler(db))
 	http.HandleFunc("/api/tasks", tasksHandler(db))
 }
 
