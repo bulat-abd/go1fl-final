@@ -19,6 +19,8 @@ func taskHandler(db *sql.DB) func(w http.ResponseWriter, r *http.Request) {
 			addTaskHandler(db)(w, r)
 		case http.MethodGet:
 			getTaskHandler(db)(w, r)
+		case http.MethodPut:
+			editTaskHandler(db)(w, r)
 		}
 	}
 }
