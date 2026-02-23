@@ -61,3 +61,23 @@ func (ts TaskStore) Update(id int64, date, title, comment, repeat string) error 
 		sql.Named("id", id))
 	return err
 }
+
+func (ts TaskStore) Upcoming(count int64) ([]Task, error) {
+	rows, err := ts.db.Query("SELECT id, date, title, comment, repeat FROM scheduler ORDER BY date ASC LIMIT :count", sql.Named("count", count))
+	if err != nil {
+		return nil, err
+	}
+	tasks := make([]Task, 0, count)
+	for rows.Next() {
+		var task Task
+		// Scan the row data into the struct fields
+		if err := rows.Scan(&task.ID, &task.Date, &task.Title, &task.Comment, &task.Repeat); err != nil {
+			return nil, err
+		}
+		tasks = append(tasks, task)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return tasks, nil
+}
