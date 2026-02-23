@@ -21,6 +21,8 @@ func taskHandler(db *sql.DB) func(w http.ResponseWriter, r *http.Request) {
 			getTaskHandler(db)(w, r)
 		case http.MethodPut:
 			editTaskHandler(db)(w, r)
+		case http.MethodDelete:
+			deleteTaskHandler(db)(w, r)
 		}
 	}
 }
