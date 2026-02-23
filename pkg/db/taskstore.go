@@ -2,6 +2,7 @@ package db
 
 import (
 	"database/sql"
+	"fmt"
 )
 
 type TaskStore struct {
@@ -54,14 +55,24 @@ func (ts TaskStore) SetDate(id int64, date string) error {
 }
 
 func (ts TaskStore) Update(id int64, date, title, comment, repeat string) error {
-	_, err := ts.db.Exec(
+	res, err := ts.db.Exec(
 		"UPDATE scheduler SET date = :date, title = :title, comment = :comment, repeat = :repeat WHERE id = :id",
 		sql.Named("date", date),
 		sql.Named("title", title),
 		sql.Named("comment", comment),
 		sql.Named("repeat", repeat),
 		sql.Named("id", id))
-	return err
+	if err != nil {
+		return err
+	}
+	count, err := res.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if count == 0 {
+		return fmt.Errorf(`incorrect id for updating task`)
+	}
+	return nil
 }
 
 func (ts TaskStore) Upcoming(count int64) ([]Task, error) {
