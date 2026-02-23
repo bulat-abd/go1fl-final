@@ -10,7 +10,8 @@ import (
 )
 
 func afterNow(date, now time.Time) bool {
-	return date.After(now)
+	// consider dates only!
+	return date.Truncate(24 * time.Hour).After(now.Truncate(24 * time.Hour))
 }
 
 func NextDate(now time.Time, dstart string, repeat string) (string, error) {

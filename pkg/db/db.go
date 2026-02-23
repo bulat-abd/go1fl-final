@@ -22,7 +22,7 @@ func Init() (*sql.DB, error) {
 		fmt.Println(err)
 		return nil, err
 	}
-	defer db.Close()
+	//defer db.Close()
 
 	createTableSQL := `
 	CREATE TABLE IF NOT EXISTS "scheduler"
