@@ -1,6 +1,7 @@
 package server
 
 import (
+	"database/sql"
 	"fmt"
 	"net/http"
 
@@ -8,9 +9,9 @@ import (
 	"github.com/bulat-abd/go1fl-final/pkg/api"
 )
 
-func Run() {
+func Run(db *sql.DB) {
 	http.Handle("/", http.FileServer(http.Dir(config.WebDir)))
-	api.Init()
+	api.Init(db)
 	err := http.ListenAndServe(fmt.Sprintf(":%d", config.GetPort()), nil)
 	if err != nil {
 		panic(err)
