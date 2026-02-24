@@ -9,6 +9,7 @@ var defaultPort = 7540
 var WebDir = "./web"
 
 var defaultDBFilePath = "scheduler.db"
+var defaultMaxTasks = 50
 
 func GetPort() int {
 	port := defaultPort
@@ -28,4 +29,15 @@ func GetDBFilePath() string {
 		path = envPath
 	}
 	return path
+}
+
+func GetMaxTasks() int {
+	maxTasks := defaultMaxTasks
+	envMaxTasks := os.Getenv("TODO_MAXTASKS")
+	if len(envMaxTasks) > 0 {
+		if parsedMaxTasks, err := strconv.ParseInt(envMaxTasks, 10, 32); err == nil {
+			maxTasks = int(parsedMaxTasks)
+		}
+	}
+	return maxTasks
 }
