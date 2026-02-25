@@ -3,12 +3,16 @@ package api
 import (
 	"fmt"
 
+	"golang.org/x/crypto/bcrypt"
+
 	"github.com/bulat-abd/go1fl-final/internal/config"
 	"github.com/golang-jwt/jwt/v5"
 )
 
 func GeneratePasswordHash(password string) string {
-	return password
+	result, _ := HashPassword(password)
+	return result
+
 }
 
 func CreateToken() (string, error) {
@@ -25,8 +29,21 @@ func CreateToken() (string, error) {
 	return signedToken, nil
 }
 
-func ValidateToken(token string) bool {
+func HashPassword(password string) (string, error) {
+	hashedBytes, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	if err != nil {
+		return "", err
+	}
+	return string(hashedBytes), nil
+}
 
+func CheckPasswordHash(password, hash string) bool {
+	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
+	return err == nil // err is nil if the password and hash match
+}
+
+func ValidateToken(token string) bool {
+	password := config.GetPassword()
 	// для примера возьмём токен, подписанный при помощи секретного ключа secretKey
 	secretKey := config.TokenSecret
 
@@ -55,11 +72,12 @@ func ValidateToken(token string) bool {
 	hashRaw := res["hash"]
 	// loginRaw — интерфейс, так как тип значения в jwt.Claims — интерфейс.
 	// Чтобы получить строку, нужно снова сделать приведение типа к строке.
-	_, ok = hashRaw.(string)
+	hash, ok := hashRaw.(string)
+	fmt.Println(hash)
 	if !ok {
 		fmt.Printf("failed to typecast to string")
 		return false
 	}
 	// TODO: compare hashes
-	return true
+	return CheckPasswordHash(password, hash)
 }
