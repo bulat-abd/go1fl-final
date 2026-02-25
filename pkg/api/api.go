@@ -7,9 +7,9 @@ import (
 
 func Init(db *sql.DB) {
 	http.HandleFunc("/api/nextdate", nextDateHandler)
-	http.HandleFunc("/api/task", taskHandler(db))
-	http.HandleFunc("/api/task/done", finishTaskHandler(db))
-	http.HandleFunc("/api/tasks", tasksHandler(db))
+	http.HandleFunc("/api/task", auth(taskHandler(db)))
+	http.HandleFunc("/api/task/done", auth(finishTaskHandler(db)))
+	http.HandleFunc("/api/tasks", auth(tasksHandler(db)))
 	http.HandleFunc("/api/signin", signinHandler)
 }
 
@@ -37,4 +37,21 @@ func tasksHandler(db *sql.DB) func(w http.ResponseWriter, r *http.Request) {
 			listTasksHandler(db)(w, r)
 		}
 	}
+}
+
+func auth(next http.HandlerFunc) http.HandlerFunc {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		var jwt string
+		cookie, err := r.Cookie("token")
+		if err == nil {
+			jwt = cookie.Value
+		}
+		var valid bool
+		valid = ValidateToken(jwt)
+		if !valid {
+			http.Error(w, "Authentification required", http.StatusUnauthorized)
+			return
+		}
+		next(w, r)
+	})
 }
