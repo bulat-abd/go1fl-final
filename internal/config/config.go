@@ -10,6 +10,9 @@ var WebDir = "./web"
 
 var defaultDBFilePath = "scheduler.db"
 var defaultMaxTasks = 50
+var defaultPassword = "12345"
+
+var Secret = []byte("secret")
 
 func GetPort() int {
 	port := defaultPort
@@ -40,4 +43,13 @@ func GetMaxTasks() int {
 		}
 	}
 	return maxTasks
+}
+
+func GetPassword() string {
+	password := defaultPassword
+	envPassword := os.Getenv("TODO_PASSWORD")
+	if len(envPassword) > 0 {
+		password = envPassword
+	}
+	return password
 }
