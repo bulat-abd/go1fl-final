@@ -25,6 +25,8 @@ COPY --from=builder /app/task_app ./
 
 COPY web ./web
 
+COPY scheduler.db .
+
 EXPOSE $PORT
 
 ENV TODO_PORT=$PORT
