@@ -12,7 +12,7 @@ var defaultDBFilePath = "scheduler.db"
 var defaultMaxTasks = 50
 var defaultPassword = "12345"
 
-var Secret = []byte("secret")
+var TokenSecret = []byte("secret")
 
 func GetPort() int {
 	port := defaultPort

@@ -27,7 +27,14 @@ func signinHandler(w http.ResponseWriter, r *http.Request) {
 	password := message["password"].(string)
 	// Timing attack vuln ahead!
 	if password == config.GetPassword() {
-		token := CreateToken()
+		token, err := CreateToken()
+		if err != nil {
+			w.Header().Set("Content-Type", "application/json")
+			json.NewEncoder(w).Encode(map[string]interface{}{
+				"error": err.Error(),
+			})
+			return
+		}
 		w.WriteHeader(http.StatusOK)
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(map[string]interface{}{"token": token})
