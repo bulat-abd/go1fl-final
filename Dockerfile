@@ -15,13 +15,21 @@ RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -ldflags="-s -w" -o 
 
 FROM scratch
 
+ARG PORT=5000
+ARG DBFILE=scheduler.db
+ARG PASSWORD=12345
+
 WORKDIR /app
 
 COPY --from=builder /app/task_app ./
 
 COPY web ./web
 
-EXPOSE 7540
+EXPOSE $PORT
+
+ENV TODO_PORT=$PORT
+ENV TODO_DBFILE=$DBFILE
+ENV TODO_PASSWORD=$PASSWORD
 
 CMD ["./task_app"]
 
