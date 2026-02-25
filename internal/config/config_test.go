@@ -39,3 +39,15 @@ func TestMaxTasksWithEnv(t *testing.T) {
 	t.Setenv("TODO_MAXTASKS", envValue)
 	assert.Equal(t, maxTasks, GetMaxTasks(), `получено неправильное максимальное количество задач`)
 }
+
+func TestPasswordWithoutEnv(t *testing.T) {
+	assert.Equal(t, defaultPassword, GetPassword(), `получен неправильный пароль`)
+}
+
+func TestPasswordWithEnv(t *testing.T) {
+	password := "password"
+	envValue := password
+
+	t.Setenv("TODO_PASSWORD", envValue)
+	assert.Equal(t, password, GetPassword(), `получен неправильный пароль`)
+}
