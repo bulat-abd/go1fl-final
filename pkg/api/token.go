@@ -39,15 +39,13 @@ func HashPassword(password string) (string, error) {
 
 func CheckPasswordHash(password, hash string) bool {
 	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
-	return err == nil // err is nil if the password and hash match
+	return err == nil
 }
 
 func ValidateToken(token string) bool {
 	password := config.GetPassword()
-	// для примера возьмём токен, подписанный при помощи секретного ключа secretKey
 	secretKey := config.TokenSecret
 
-	// парсим токен
 	jwtToken, err := jwt.Parse(token, func(t *jwt.Token) (interface{}, error) {
 		return secretKey, nil
 	})
@@ -59,24 +57,16 @@ func ValidateToken(token string) bool {
 		fmt.Printf("token is invalid")
 		return false
 	}
-	// приводим поле Claims к типу jwt.MapClaims
 	res, ok := jwtToken.Claims.(jwt.MapClaims)
-	// обязательно используем второе возвращаемое значение ok и проверяем его, потому что
-	// если Сlaims вдруг окажется другого типа, мы получим панику
 	if !ok {
 		fmt.Printf("failed to type assertion of jwt.MapClaims")
 		return false
 	}
-	// Так как jwt.Claims — словарь вида map[string]inteface{}, используем синтаксис получения
-	// значения по ключу. Получаем значение ключа "login" и "roles"
 	hashRaw := res["hash"]
-	// loginRaw — интерфейс, так как тип значения в jwt.Claims — интерфейс.
-	// Чтобы получить строку, нужно снова сделать приведение типа к строке.
 	hash, ok := hashRaw.(string)
 	if !ok {
 		fmt.Printf("failed to typecast to string")
 		return false
 	}
-	// TODO: compare hashes
 	return CheckPasswordHash(password, hash)
 }
