@@ -55,7 +55,7 @@ func ValidateToken(token string) bool {
 	hashRaw := res["hash"]
 	// loginRaw — интерфейс, так как тип значения в jwt.Claims — интерфейс.
 	// Чтобы получить строку, нужно снова сделать приведение типа к строке.
-	hash, ok := hashRaw.(string)
+	_, ok = hashRaw.(string)
 	if !ok {
 		fmt.Printf("failed to typecast to string")
 		return false
