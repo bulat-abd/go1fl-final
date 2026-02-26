@@ -2,7 +2,6 @@ package api
 
 import (
 	"database/sql"
-	"encoding/json"
 	"net/http"
 	"strconv"
 
@@ -27,7 +26,6 @@ func deleteTaskHandler(database *sql.DB) func(w http.ResponseWriter, r *http.Req
 			JsonError(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
-		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(map[string]interface{}{})
+		JsonResponse(w, map[string]interface{}{})
 	}
 }

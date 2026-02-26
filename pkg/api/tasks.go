@@ -2,7 +2,6 @@ package api
 
 import (
 	"database/sql"
-	"encoding/json"
 	"net/http"
 	"time"
 
@@ -40,10 +39,6 @@ func listTasksHandler(database *sql.DB) func(w http.ResponseWriter, r *http.Requ
 		if tasks == nil {
 			tasks = make([]db.Task, 0)
 		}
-		w.WriteHeader(http.StatusOK)
-		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(map[string]interface{}{
-			"tasks": tasks,
-		})
+		JsonResponse(w, map[string]interface{}{"tasks": tasks})
 	}
 }

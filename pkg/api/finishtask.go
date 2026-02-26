@@ -2,7 +2,6 @@ package api
 
 import (
 	"database/sql"
-	"encoding/json"
 	"net/http"
 	"strconv"
 	"time"
@@ -39,8 +38,7 @@ func finishTaskHandler(database *sql.DB) func(w http.ResponseWriter, r *http.Req
 				JsonError(w, err.Error(), http.StatusInternalServerError)
 				return
 			}
-			w.Header().Set("Content-Type", "application/json")
-			json.NewEncoder(w).Encode(map[string]interface{}{})
+			JsonResponse(w, map[string]interface{}{})
 			return
 		}
 		now := time.Now()
@@ -50,7 +48,6 @@ func finishTaskHandler(database *sql.DB) func(w http.ResponseWriter, r *http.Req
 			JsonError(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
-		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(map[string]interface{}{})
+		JsonResponse(w, map[string]interface{}{})
 	}
 }

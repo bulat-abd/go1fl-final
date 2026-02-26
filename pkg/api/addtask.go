@@ -14,10 +14,6 @@ func addTaskHandler(database *sql.DB) func(w http.ResponseWriter, r *http.Reques
 		err := json.NewDecoder(r.Body).Decode(&task)
 		defer r.Body.Close()
 		if err != nil {
-			w.Header().Set("Content-Type", "application/json")
-			json.NewEncoder(w).Encode(map[string]interface{}{
-				"error": err.Error(),
-			})
 			JsonError(w, err.Error(), http.StatusBadRequest)
 			return
 		}
@@ -39,9 +35,7 @@ func addTaskHandler(database *sql.DB) func(w http.ResponseWriter, r *http.Reques
 			return
 		}
 		// return id in JSON
-		w.WriteHeader(http.StatusOK)
-		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(map[string]interface{}{
+		JsonResponse(w, map[string]interface{}{
 			"id": id,
 		})
 	}

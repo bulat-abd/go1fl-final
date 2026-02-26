@@ -19,7 +19,7 @@ func nextDateHandler(w http.ResponseWriter, req *http.Request) {
 		}
 		result, err := datecalc.NextDate(now, date, repeat)
 		if err != nil {
-			JsonError(w, err.Error(), http.StatusBadRequest)
+			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
 		w.WriteHeader(http.StatusOK)

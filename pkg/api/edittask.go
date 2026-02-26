@@ -33,9 +33,6 @@ func editTaskHandler(database *sql.DB) func(w http.ResponseWriter, r *http.Reque
 			JsonError(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
-		// return id in JSON
-		w.WriteHeader(http.StatusOK)
-		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(map[string]interface{}{})
+		JsonResponse(w, map[string]interface{}{})
 	}
 }

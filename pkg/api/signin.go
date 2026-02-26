@@ -30,9 +30,7 @@ func signinHandler(w http.ResponseWriter, r *http.Request) {
 			JsonError(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
-		w.WriteHeader(http.StatusOK)
-		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(map[string]interface{}{"token": token})
+		JsonResponse(w, map[string]interface{}{"token": token})
 		return
 	} else {
 		JsonError(w, "Неправильный пароль", http.StatusOK)
