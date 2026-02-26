@@ -51,3 +51,14 @@ func TestPasswordWithEnv(t *testing.T) {
 	t.Setenv("TODO_PASSWORD", envValue)
 	assert.Equal(t, password, GetPassword(), `получен неправильный пароль`)
 }
+
+func TestTokenSecretWithoutEnv(t *testing.T) {
+	assert.Equal(t, defaultTokenSecret, GetTokenSecret(), `получен неправильный JWT секрет`)
+}
+
+func TestTokenSecretWithEnv(t *testing.T) {
+	secret := "supersecret"
+	envValue := secret
+	t.Setenv("TODO_TOKENSECRET", envValue)
+	assert.Equal(t, []byte(secret), GetTokenSecret(), `получен неправильный JWT секрет`)
+}

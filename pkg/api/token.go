@@ -17,7 +17,7 @@ func GeneratePasswordHash(password string) string {
 
 func CreateToken() (string, error) {
 	password := config.GetPassword()
-	secret := config.TokenSecret
+	secret := config.GetTokenSecret()
 	claims := jwt.MapClaims{
 		"hash": GeneratePasswordHash(password),
 	}
@@ -44,7 +44,7 @@ func CheckPasswordHash(password, hash string) bool {
 
 func ValidateToken(token string) bool {
 	password := config.GetPassword()
-	secretKey := config.TokenSecret
+	secretKey := config.GetTokenSecret()
 
 	jwtToken, err := jwt.Parse(token, func(t *jwt.Token) (interface{}, error) {
 		return secretKey, nil
