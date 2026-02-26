@@ -75,15 +75,14 @@ func (ts TaskStore) Update(id int64, date, title, comment, repeat string) error 
 	return nil
 }
 
-func (ts TaskStore) Upcoming(count int64) ([]Task, error) {
-	rows, err := ts.db.Query("SELECT id, date, title, comment, repeat FROM scheduler ORDER BY date ASC LIMIT :count", sql.Named("count", count))
+func (ts TaskStore) multipleRowSelect(query string, count int64, args ...interface{}) ([]Task, error) {
+	rows, err := ts.db.Query(query, args...)
 	if err != nil {
 		return nil, err
 	}
 	tasks := make([]Task, 0, count)
 	for rows.Next() {
 		var task Task
-		// Scan the row data into the struct fields
 		if err := rows.Scan(&task.ID, &task.Date, &task.Title, &task.Comment, &task.Repeat); err != nil {
 			return nil, err
 		}
@@ -93,45 +92,21 @@ func (ts TaskStore) Upcoming(count int64) ([]Task, error) {
 		return nil, err
 	}
 	return tasks, nil
+
+}
+
+func (ts TaskStore) Upcoming(count int64) ([]Task, error) {
+	query := "SELECT id, date, title, comment, repeat FROM scheduler ORDER BY date ASC LIMIT :count"
+	return ts.multipleRowSelect(query, count, sql.Named("count", count))
 }
 
 func (ts TaskStore) SearchByDate(date string, count int64) ([]Task, error) {
-	rows, err := ts.db.Query("SELECT id, date, title, comment, repeat FROM scheduler WHERE date = :date LIMIT :count", sql.Named("date", date), sql.Named("count", count))
-	if err != nil {
-		return nil, err
-	}
-	tasks := make([]Task, 0, count)
-	for rows.Next() {
-		var task Task
-		// Scan the row data into the struct fields
-		if err := rows.Scan(&task.ID, &task.Date, &task.Title, &task.Comment, &task.Repeat); err != nil {
-			return nil, err
-		}
-		tasks = append(tasks, task)
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return tasks, nil
+	query := "SELECT id, date, title, comment, repeat FROM scheduler WHERE date = :date LIMIT :count"
+	return ts.multipleRowSelect(query, count, sql.Named("date", date), sql.Named("count", count))
 }
 
 func (ts TaskStore) SearchByText(text string, count int64) ([]Task, error) {
 	pattern := "%" + text + "%"
-	rows, err := ts.db.Query("SELECT id, date, title, comment, repeat FROM scheduler WHERE title LIKE :pattern OR comment LIKE :pattern ORDER BY date ASC LIMIT :count", sql.Named("pattern", pattern), sql.Named("count", count))
-	if err != nil {
-		return nil, err
-	}
-	tasks := make([]Task, 0, count)
-	for rows.Next() {
-		var task Task
-		// Scan the row data into the struct fields
-		if err := rows.Scan(&task.ID, &task.Date, &task.Title, &task.Comment, &task.Repeat); err != nil {
-			return nil, err
-		}
-		tasks = append(tasks, task)
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return tasks, nil
+	query := "SELECT id, date, title, comment, repeat FROM scheduler WHERE title LIKE :pattern OR comment LIKE :pattern ORDER BY date ASC LIMIT :count"
+	return ts.multipleRowSelect(query, count, sql.Named("pattern", pattern), sql.Named("count", count))
 }
