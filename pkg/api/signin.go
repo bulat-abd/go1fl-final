@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/bulat-abd/go1fl-final/internal/config"
+	"github.com/bulat-abd/go1fl-final/pkg/token"
 )
 
 func signinHandler(w http.ResponseWriter, r *http.Request) {
@@ -27,7 +28,7 @@ func signinHandler(w http.ResponseWriter, r *http.Request) {
 	password := message["password"].(string)
 	// Timing attack vuln ahead!
 	if password == config.GetPassword() {
-		token, err := CreateToken()
+		token, err := token.CreateToken()
 		if err != nil {
 			w.Header().Set("Content-Type", "application/json")
 			json.NewEncoder(w).Encode(map[string]interface{}{
