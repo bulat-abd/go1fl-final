@@ -5,13 +5,15 @@ import (
 	"strconv"
 )
 
-var WebDir = "./web"
+const (
+	defaultDBFilePath  = "scheduler.db"
+	defaultMaxTasks    = 50
+	defaultPassword    = "12345"
+	defaultPort        = 7540
+	defaultTokenSecret = "secret" // gets converted to []byte, should maybe used base64/hex encoding here
 
-var defaultPort = 7540
-var defaultDBFilePath = "scheduler.db"
-var defaultMaxTasks = 50
-var defaultPassword = "12345"
-var defaultTokenSecret = "secret" // gets converted to []byte, should maybe used base64/hex encoding here
+	WebDir = "./web"
+)
 
 func getIntParameter(envVar string, defaultValue int) int {
 	result := defaultValue
