@@ -5,60 +5,53 @@ import (
 	"strconv"
 )
 
-var defaultPort = 7540
-var WebDir = "./web"
+const (
+	defaultDBFilePath  = "scheduler.db"
+	defaultMaxTasks    = 50
+	defaultPassword    = "12345"
+	defaultPort        = 7540
+	defaultTokenSecret = "secret" // gets converted to []byte, should maybe used base64/hex encoding here
 
-var defaultDBFilePath = "scheduler.db"
-var defaultMaxTasks = 50
-var defaultPassword = "12345"
+	WebDir = "./web"
+)
 
-var defaultTokenSecret = []byte("secret")
-
-func GetPort() int {
-	port := defaultPort
-	envPort := os.Getenv("TODO_PORT")
-	if len(envPort) > 0 {
-		if parsedPort, err := strconv.ParseInt(envPort, 10, 32); err == nil {
-			port = int(parsedPort)
+func getIntParameter(envVar string, defaultValue int) int {
+	result := defaultValue
+	envValueStr := os.Getenv(envVar)
+	if len(envValueStr) > 0 {
+		if parsedValue, err := strconv.ParseInt(envValueStr, 10, 32); err == nil {
+			result = int(parsedValue)
 		}
+
 	}
-	return port
+	return result
 }
 
-func GetDBFilePath() string {
-	path := defaultDBFilePath
-	envPath := os.Getenv("TODO_DBFILE")
-	if len(envPath) > 0 {
-		path = envPath
-	}
-	return path
+func GetPort() int {
+	return getIntParameter("TODO_PORT", defaultPort)
 }
 
 func GetMaxTasks() int {
-	maxTasks := defaultMaxTasks
-	envMaxTasks := os.Getenv("TODO_MAXTASKS")
-	if len(envMaxTasks) > 0 {
-		if parsedMaxTasks, err := strconv.ParseInt(envMaxTasks, 10, 32); err == nil {
-			maxTasks = int(parsedMaxTasks)
-		}
+	return getIntParameter("TODO_MAXTASKS", defaultMaxTasks)
+}
+
+func getStringParameter(envVar string, defaultValue string) string {
+	result := defaultValue
+	envValueStr := os.Getenv(envVar)
+	if len(envValueStr) > 0 {
+		result = envValueStr
 	}
-	return maxTasks
+	return result
+}
+
+func GetDBFilePath() string {
+	return getStringParameter("TODO_DBFILE", defaultDBFilePath)
 }
 
 func GetPassword() string {
-	password := defaultPassword
-	envPassword := os.Getenv("TODO_PASSWORD")
-	if len(envPassword) > 0 {
-		password = envPassword
-	}
-	return password
+	return getStringParameter("TODO_PASSWORD", defaultPassword)
 }
 
 func GetTokenSecret() []byte {
-	secret := defaultTokenSecret
-	envSecret := os.Getenv("TODO_TOKENSECRET")
-	if len(envSecret) > 0 {
-		secret = []byte(envSecret)
-	}
-	return secret
+	return []byte(getStringParameter("TODO_TOKENSECRET", defaultTokenSecret))
 }

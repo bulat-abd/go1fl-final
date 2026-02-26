@@ -53,7 +53,7 @@ func TestPasswordWithEnv(t *testing.T) {
 }
 
 func TestTokenSecretWithoutEnv(t *testing.T) {
-	assert.Equal(t, defaultTokenSecret, GetTokenSecret(), `получен неправильный JWT секрет`)
+	assert.Equal(t, []byte(defaultTokenSecret), GetTokenSecret(), `получен неправильный JWT секрет`)
 }
 
 func TestTokenSecretWithEnv(t *testing.T) {
