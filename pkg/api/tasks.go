@@ -9,11 +9,6 @@ import (
 	"github.com/bulat-abd/go1fl-final/pkg/db"
 )
 
-/*
-	type TasksResp struct {
-	    Tasks []*db.Task `json:"tasks"`
-	}
-*/
 var MaxTasks = int64(config.GetMaxTasks())
 
 func listTasksHandler(database *sql.DB) func(w http.ResponseWriter, r *http.Request) {
