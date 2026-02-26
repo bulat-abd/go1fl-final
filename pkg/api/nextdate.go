@@ -14,12 +14,12 @@ func nextDateHandler(w http.ResponseWriter, req *http.Request) {
 		date := req.FormValue("date")
 		repeat := req.FormValue("repeat")
 		if repeat == "" {
-			w.WriteHeader(http.StatusBadRequest)
+			JsonError(w, "No repeat value provided", http.StatusBadRequest)
 			return
 		}
 		result, err := datecalc.NextDate(now, date, repeat)
 		if err != nil {
-			w.WriteHeader(http.StatusBadRequest)
+			JsonError(w, err.Error(), http.StatusBadRequest)
 			return
 		}
 		w.WriteHeader(http.StatusOK)

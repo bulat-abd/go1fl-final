@@ -34,10 +34,7 @@ func listTasksHandler(database *sql.DB) func(w http.ResponseWriter, r *http.Requ
 			}
 		}
 		if err != nil {
-			w.Header().Set("Content-Type", "application/json")
-			json.NewEncoder(w).Encode(map[string]interface{}{
-				"error": err.Error(),
-			})
+			JsonError(w, err.Error(), http.StatusBadRequest)
 			return
 		}
 		if tasks == nil {

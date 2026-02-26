@@ -18,32 +18,24 @@ func addTaskHandler(database *sql.DB) func(w http.ResponseWriter, r *http.Reques
 			json.NewEncoder(w).Encode(map[string]interface{}{
 				"error": err.Error(),
 			})
+			JsonError(w, err.Error(), http.StatusBadRequest)
 			return
 		}
 
 		if task.Title == "" {
-			w.Header().Set("Content-Type", "application/json")
-			json.NewEncoder(w).Encode(map[string]interface{}{
-				"error": "Bad title",
-			})
+			JsonError(w, "Bad title", http.StatusBadRequest)
 			return
 		}
 		err = task.CheckDate()
 		if err != nil {
-			w.Header().Set("Content-Type", "application/json")
-			json.NewEncoder(w).Encode(map[string]interface{}{
-				"error": err.Error(),
-			})
+			JsonError(w, err.Error(), http.StatusBadRequest)
 			return
 		}
 		// add task to db
 		ts := db.NewTaskStore(database)
 		id, err := ts.Add(task)
 		if err != nil {
-			w.Header().Set("Content-Type", "application/json")
-			json.NewEncoder(w).Encode(map[string]interface{}{
-				"error": err.Error(),
-			})
+			JsonError(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 		// return id in JSON

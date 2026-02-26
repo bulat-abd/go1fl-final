@@ -14,41 +14,29 @@ import (
 func finishTaskHandler(database *sql.DB) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodPost {
-			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+			JsonError(w, "Method not allowed", http.StatusMethodNotAllowed)
 			return
 		}
 		idStr := r.URL.Query().Get("id")
 		if idStr == "" {
-			w.Header().Set("Content-Type", "application/json")
-			json.NewEncoder(w).Encode(map[string]interface{}{
-				"error": "No ID presented",
-			})
+			JsonError(w, "No ID presented", http.StatusBadRequest)
 			return
 		}
 		id, err := strconv.Atoi(idStr)
 		if err != nil {
-			w.Header().Set("Content-Type", "application/json")
-			json.NewEncoder(w).Encode(map[string]interface{}{
-				"error": err.Error(),
-			})
+			JsonError(w, err.Error(), http.StatusBadRequest)
 			return
 		}
 		ts := db.NewTaskStore(database)
 		task, err := ts.Get(int64(id))
 		if err != nil {
-			w.Header().Set("Content-Type", "application/json")
-			json.NewEncoder(w).Encode(map[string]interface{}{
-				"error": err.Error(),
-			})
+			JsonError(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 		if task.Repeat == "" {
 			err = ts.Delete(task.ID)
 			if err != nil {
-				w.Header().Set("Content-Type", "application/json")
-				json.NewEncoder(w).Encode(map[string]interface{}{
-					"error": err.Error(),
-				})
+				JsonError(w, err.Error(), http.StatusInternalServerError)
 				return
 			}
 			w.Header().Set("Content-Type", "application/json")
@@ -59,10 +47,7 @@ func finishTaskHandler(database *sql.DB) func(w http.ResponseWriter, r *http.Req
 		nextDate, err := datecalc.NextDate(now, task.Date, task.Repeat)
 		err = ts.SetDate(int64(id), nextDate)
 		if err != nil {
-			w.Header().Set("Content-Type", "application/json")
-			json.NewEncoder(w).Encode(map[string]interface{}{
-				"error": err.Error(),
-			})
+			JsonError(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 		w.Header().Set("Content-Type", "application/json")
