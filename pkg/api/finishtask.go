@@ -7,6 +7,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/bulat-abd/go1fl-final/pkg/datecalc"
 	"github.com/bulat-abd/go1fl-final/pkg/db"
 )
 
@@ -55,7 +56,7 @@ func finishTaskHandler(database *sql.DB) func(w http.ResponseWriter, r *http.Req
 			return
 		}
 		now := time.Now()
-		nextDate, err := NextDate(now, task.Date, task.Repeat)
+		nextDate, err := datecalc.NextDate(now, task.Date, task.Repeat)
 		err = ts.SetDate(int64(id), nextDate)
 		if err != nil {
 			w.Header().Set("Content-Type", "application/json")

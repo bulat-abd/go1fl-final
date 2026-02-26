@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/bulat-abd/go1fl-final/pkg/datecalc"
 	"github.com/bulat-abd/go1fl-final/pkg/db"
 )
 
@@ -67,13 +68,13 @@ func checkDate(task *db.Task) error {
 		return err
 	}
 	if task.Repeat != "" {
-		next, err = NextDate(now, task.Date, task.Repeat)
+		next, err = datecalc.NextDate(now, task.Date, task.Repeat)
 		if err != nil {
 			return err
 		}
 
 	}
-	if afterNow(now, t) {
+	if datecalc.AfterNow(now, t) {
 		if len(task.Repeat) == 0 {
 			// если правила повторения нет, то берём сегодняшнее число
 			task.Date = now.Format("20060102")
