@@ -42,11 +42,3 @@ func (task *Task) CheckDate() error {
 	}
 	return nil
 }
-
-type TaskService struct {
-	store TaskStore
-}
-
-func NewTaskService(store TaskStore) TaskService {
-	return TaskService{store: store}
-}
