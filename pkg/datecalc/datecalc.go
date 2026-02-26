@@ -13,7 +13,11 @@ func AfterNow(date, now time.Time) bool {
 	return date.Truncate(24 * time.Hour).After(now.Truncate(24 * time.Hour))
 }
 
-func processDailyRepeat(now time.Time, dstart string, repeat string, date time.Time) (string, error) {
+func processDailyRepeat(now time.Time, dstart string, repeat string) (string, error) {
+	date, err := time.Parse("20060102", dstart)
+	if err != nil {
+		return "", err
+	}
 	parts := strings.Split(repeat, " ")
 	if len(parts) < 2 {
 		return "", errors.New("Bad repeat parameter value")
@@ -34,7 +38,11 @@ func processDailyRepeat(now time.Time, dstart string, repeat string, date time.T
 	return date.Format("20060102"), nil
 }
 
-func processYearlyRepeat(now time.Time, dstart string, repeat string, date time.Time) (string, error) {
+func processYearlyRepeat(now time.Time, dstart string, repeat string) (string, error) {
+	date, err := time.Parse("20060102", dstart)
+	if err != nil {
+		return "", err
+	}
 	for {
 		date = date.AddDate(1, 0, 0)
 		if AfterNow(date, now) {
@@ -44,131 +52,108 @@ func processYearlyRepeat(now time.Time, dstart string, repeat string, date time.
 	return date.Format("20060102"), nil
 }
 
-func processWeeklyRepeat(now time.Time, dstart string, repeat string, date time.Time) (string, error) {
+func processCommaSeparatedParts(str string, minValue, maxValue int) ([]int, error) {
+	if str == "" {
+		return []int{}, errors.New("Bad repeat parameter value")
+	}
+	parts := strings.Split(str, ",")
+	slice := make([]int, 0, len(parts))
+	for _, part := range parts {
+		value, err := strconv.Atoi(part)
+		if err != nil {
+			return []int{}, errors.New("Bad repeat parameter value")
+		}
+		if value < minValue || value > maxValue {
+			return []int{}, errors.New("Bad repeat parameter value")
+		}
+		slice = append(slice, value)
+	}
+	return slice, nil
+}
+
+func processWeeklyRepeat(now time.Time, dstart string, repeat string) (string, error) {
+	date, err := time.Parse("20060102", dstart)
+	if err != nil {
+		return "", err
+	}
 	wstr := strings.Split(repeat, " ")
 	if len(wstr) != 2 {
 		return "", errors.New("Bad repeat parameter value")
 	}
-	daystr := strings.Split(wstr[1], ",")
-	if len(daystr) == 0 {
+	weekdaysStr := strings.Split(wstr[1], ",")
+	if len(weekdaysStr) == 0 {
 		return "", errors.New("Bad repeat parameter value")
 	}
-	days := make([]int, 0, len(daystr))
-	for _, dstr := range daystr {
-		day, err := strconv.Atoi(dstr)
-		if err != nil {
-			return "", errors.New("Bad repeat parameter value")
+	weekdays, err := processCommaSeparatedParts(wstr[1], 1, 7)
+	if err != nil {
+		return "", err
+	}
+	for i := 0; i < len(weekdays); i++ {
+		if weekdays[i] == 7 {
+			weekdays[i] = 0
 		}
-		if day < 1 || day > 7 {
-			return "", errors.New("Bad repeat parameter value")
-		}
-		if day == 7 {
-			day = 0
-		}
-		days = append(days, day)
 	}
 	for {
 		date = date.AddDate(0, 0, 1)
-		dayInt := int(date.Weekday())
-		if AfterNow(date, now) && slices.Contains(days, dayInt) {
+		currentWeekday := int(date.Weekday())
+		if AfterNow(date, now) && slices.Contains(weekdays, currentWeekday) {
 			break
 		}
 	}
 	return date.Format("20060102"), nil
 }
 
-func processMonthlyRepeat(now time.Time, dstart string, repeat string, date time.Time) (string, error) {
+func daysInMonth(date time.Time) int {
+	t := time.Date(date.Year(), date.Month(), 32, 0, 0, 0, 0, time.UTC)
+	return 32 - t.Day()
+}
+
+func processMonthlyRepeat(now time.Time, dstart string, repeat string) (string, error) {
+	date, err := time.Parse("20060102", dstart)
+	if err != nil {
+		return "", err
+	}
 	mstr := strings.Split(repeat, " ")
 	if len(mstr) < 2 && len(mstr) > 3 {
 		return "", errors.New("Bad repeat parameter value")
 	}
 
-	if len(mstr) == 2 {
-		weekdaysstr := strings.Split(mstr[1], ",")
-		if len(weekdaysstr) == 0 {
-			return "", errors.New("Bad repeat parameter value")
-		}
-		weekdays := make([]int, 0, len(weekdaysstr))
-		for _, weekdaystr := range weekdaysstr {
-			weekday, err := strconv.Atoi(weekdaystr)
-			if err != nil {
-				return "", errors.New("Bad repeat parameter value")
-			}
-			if weekday < -2 || weekday > 31 {
-				return "", errors.New("Bad repeat parameter value")
-			}
-			weekdays = append(weekdays, weekday)
-		}
-		for {
-			date = date.AddDate(0, 0, 1)
-			dayInt := int(date.Day())
-			t := time.Date(date.Year(), date.Month(), 32, 0, 0, 0, 0, time.UTC)
-			daysInMonth := 32 - t.Day()
-			if AfterNow(date, now) && (slices.Contains(weekdays, dayInt) || slices.Contains(weekdays, dayInt-daysInMonth-1)) {
-				break
-			}
-		}
-		return date.Format("20060102"), nil
+	months := []int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12}
+
+	days, err := processCommaSeparatedParts(mstr[1], -2, 31)
+	if err != nil {
+		return "", errors.New("Bad repeat parameter value")
 	}
 	if len(mstr) == 3 {
-		weekdaysstr := strings.Split(mstr[1], ",")
-		if len(weekdaysstr) == 0 {
+		months, err = processCommaSeparatedParts(mstr[2], 1, 12)
+		if err != nil {
 			return "", errors.New("Bad repeat parameter value")
 		}
-		weekdays := make([]int, 0, len(weekdaysstr))
-		for _, weekdaystr := range weekdaysstr {
-			weekday, err := strconv.Atoi(weekdaystr)
-			if err != nil {
-				return "", errors.New("Bad repeat parameter value")
-			}
-			if weekday < -2 || weekday > 31 {
-				return "", errors.New("Bad repeat parameter value")
-			}
-			weekdays = append(weekdays, weekday)
-		}
-		monthsstr := strings.Split(mstr[2], ",")
-		if len(monthsstr) == 0 {
-			return "", errors.New("Bad repeat parameter value")
-		}
-		months := make([]int, 0, len(monthsstr))
-		for _, monthstr := range monthsstr {
-			month, err := strconv.Atoi(monthstr)
-			if err != nil {
-				return "", errors.New("Bad repeat parameter value")
-			}
-			if month < 1 || month > 12 {
-				return "", errors.New("Bad repeat parameter value")
-			}
-			months = append(months, month)
-		}
-		for {
-			date = date.AddDate(0, 0, 1)
-			dayInt := int(date.Day())
-			monthInt := int(date.Month())
-			t := time.Date(date.Year(), date.Month(), 32, 0, 0, 0, 0, time.UTC)
-			daysInMonth := 32 - t.Day()
-			if AfterNow(date, now) && slices.Contains(months, monthInt) && (slices.Contains(weekdays, dayInt) || slices.Contains(weekdays, dayInt-daysInMonth-1)) {
-				break
-			}
-		}
-		return date.Format("20060102"), nil
 	}
-	return "", errors.New("Bad repeat parameter value")
+	for {
+		date = date.AddDate(0, 0, 1)
+		dayInt := int(date.Day())
+		monthInt := int(date.Month())
+		if AfterNow(date, now) && slices.Contains(months, monthInt) && (slices.Contains(days, dayInt) || slices.Contains(days, dayInt-daysInMonth(date)-1)) {
+			break
+		}
+	}
+	return date.Format("20060102"), nil
 }
 
 func NextDate(now time.Time, dstart string, repeat string) (string, error) {
-	date, err := time.Parse("20060102", dstart)
-	if err != nil {
-		return "", err
+	if len(repeat) == 0 {
+		return "", errors.New("Bad repeat parameter value")
 	}
-	if string(repeat[0]) == "d" {
-		return processDailyRepeat(now, dstart, repeat, date)
-	} else if repeat == "y" {
-		return processYearlyRepeat(now, dstart, repeat, date)
-	} else if string(repeat[0]) == "w" {
-		return processWeeklyRepeat(now, dstart, repeat, date)
-	} else if string(repeat[0]) == "m" {
-		return processMonthlyRepeat(now, dstart, repeat, date)
+	switch string(repeat[0]) {
+	case "d":
+		return processDailyRepeat(now, dstart, repeat)
+	case "y":
+		return processYearlyRepeat(now, dstart, repeat)
+	case "w":
+		return processWeeklyRepeat(now, dstart, repeat)
+	case "m":
+		return processMonthlyRepeat(now, dstart, repeat)
 	}
 	return "", errors.New("Bad repeat parameter value")
 }
