@@ -4,9 +4,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"net/http"
-	"time"
 
-	"github.com/bulat-abd/go1fl-final/pkg/datecalc"
 	"github.com/bulat-abd/go1fl-final/pkg/db"
 )
 
@@ -30,7 +28,7 @@ func addTaskHandler(database *sql.DB) func(w http.ResponseWriter, r *http.Reques
 			})
 			return
 		}
-		err = checkDate(&task)
+		err = task.CheckDate()
 		if err != nil {
 			w.Header().Set("Content-Type", "application/json")
 			json.NewEncoder(w).Encode(map[string]interface{}{
@@ -55,33 +53,4 @@ func addTaskHandler(database *sql.DB) func(w http.ResponseWriter, r *http.Reques
 			"id": id,
 		})
 	}
-}
-
-func checkDate(task *db.Task) error {
-	var next string
-	now := time.Now()
-	if task.Date == "" {
-		task.Date = now.Format("20060102")
-	}
-	t, err := time.Parse("20060102", task.Date)
-	if err != nil {
-		return err
-	}
-	if task.Repeat != "" {
-		next, err = datecalc.NextDate(now, task.Date, task.Repeat)
-		if err != nil {
-			return err
-		}
-
-	}
-	if datecalc.AfterNow(now, t) {
-		if len(task.Repeat) == 0 {
-			// если правила повторения нет, то берём сегодняшнее число
-			task.Date = now.Format("20060102")
-		} else {
-			// в противном случае, берём вычисленную ранее следующую дату
-			task.Date = next
-		}
-	}
-	return nil
 }

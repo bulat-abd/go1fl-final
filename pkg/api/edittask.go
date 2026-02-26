@@ -27,7 +27,7 @@ func editTaskHandler(database *sql.DB) func(w http.ResponseWriter, r *http.Reque
 			})
 			return
 		}
-		err = checkDate(&task)
+		err = task.CheckDate()
 		if err != nil {
 			w.Header().Set("Content-Type", "application/json")
 			json.NewEncoder(w).Encode(map[string]interface{}{
