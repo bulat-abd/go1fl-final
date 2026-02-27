@@ -25,6 +25,8 @@ func taskHandler(db *sql.DB) func(w http.ResponseWriter, r *http.Request) {
 			editTaskHandler(db)(w, r)
 		case http.MethodDelete:
 			deleteTaskHandler(db)(w, r)
+		default:
+			http.Error(w, "That method is not allowed.", http.StatusMethodNotAllowed)
 		}
 	}
 }
