@@ -22,9 +22,12 @@ func (ts *TaskStore) Add(t Task) (int64, error) {
 		sql.Named("repeat", t.Repeat),
 	)
 	if err != nil {
-		return 0, err
+		return 0, fmt.Errorf("error in db.Exec: %w", err)
 	}
 	id, err := res.LastInsertId()
+	if err != nil {
+		err = fmt.Errorf("error in LstInsertId %w", err)
+	}
 	return id, err
 }
 
@@ -33,7 +36,7 @@ func (ts *TaskStore) Get(id int64) (Task, error) {
 	t := Task{}
 	err := row.Scan(&t.ID, &t.Date, &t.Title, &t.Comment, &t.Repeat)
 	if err != nil {
-		return Task{}, err
+		return Task{}, fmt.Errorf("error in row.Scan: %w", err)
 	}
 	return t, nil
 }
@@ -43,6 +46,9 @@ func (ts *TaskStore) Delete(id int64) error {
 		"DELETE FROM scheduler WHERE id = :id",
 		sql.Named("id", id),
 	)
+	if err != nil {
+		err = fmt.Errorf("error in db.Exec: %w", err)
+	}
 	return err
 }
 
@@ -51,6 +57,9 @@ func (ts *TaskStore) SetDate(id int64, date string) error {
 		"UPDATE scheduler SET date = :date WHERE id = :id",
 		sql.Named("date", date),
 		sql.Named("id", id))
+	if err != nil {
+		err = fmt.Errorf("error in db.Exec: %w", err)
+	}
 	return err
 }
 
@@ -63,11 +72,11 @@ func (ts *TaskStore) Update(id int64, date, title, comment, repeat string) error
 		sql.Named("repeat", repeat),
 		sql.Named("id", id))
 	if err != nil {
-		return err
+		return fmt.Errorf("error in db.Exec: %w", err)
 	}
 	count, err := res.RowsAffected()
 	if err != nil {
-		return err
+		return fmt.Errorf("error in RowsAffected: %w", err)
 	}
 	if count == 0 {
 		return fmt.Errorf(`incorrect id for updating task`)
@@ -78,18 +87,18 @@ func (ts *TaskStore) Update(id int64, date, title, comment, repeat string) error
 func (ts *TaskStore) multipleRowSelect(query string, count int64, args ...interface{}) ([]Task, error) {
 	rows, err := ts.db.Query(query, args...)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("error in db.Query: %w", err)
 	}
 	tasks := make([]Task, 0, count)
 	for rows.Next() {
 		var task Task
 		if err := rows.Scan(&task.ID, &task.Date, &task.Title, &task.Comment, &task.Repeat); err != nil {
-			return nil, err
+			return nil, fmt.Errorf("error in rows.Scan: %w", err)
 		}
 		tasks = append(tasks, task)
 	}
 	if err := rows.Err(); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("error from rows.Err: %w", err)
 	}
 	return tasks, nil
 
