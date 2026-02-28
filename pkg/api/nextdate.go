@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/bulat-abd/go1fl-final/pkg/datecalc"
+	log "github.com/sirupsen/logrus"
 )
 
 func nextDateHandler(w http.ResponseWriter, req *http.Request) {
@@ -23,6 +24,9 @@ func nextDateHandler(w http.ResponseWriter, req *http.Request) {
 			return
 		}
 		w.WriteHeader(http.StatusOK)
-		w.Write([]byte(result))
+		_, err = w.Write([]byte(result))
+		if err != nil {
+			log.Error("error in nextDateHandler while writing response:", err)
+		}
 	}
 }
