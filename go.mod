@@ -7,6 +7,7 @@ toolchain go1.24.13
 require (
 	github.com/golang-jwt/jwt/v5 v5.3.1
 	github.com/jmoiron/sqlx v1.4.0
+	github.com/sirupsen/logrus v1.9.4
 	github.com/stretchr/testify v1.11.1
 	golang.org/x/crypto v0.48.0
 	modernc.org/sqlite v1.45.0
